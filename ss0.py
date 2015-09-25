@@ -1,12 +1,13 @@
 import sys
 import os
 import socket
-from socket import error as SocketError
 import errno
 import time
-from contextlib import suppress
 import traceback
 import struct
+#from contextlib import suppress
+#from socket import error as SocketError
+
 class Logger():
     def __init__(self,fullPath):
         self.fpath=fullPath
@@ -46,7 +47,7 @@ def main(wdir):
     wlog=Logger(os.path.join(wdir,"log.txt"))
     try:
         ServerSocket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ServerSocket.bind(("127.0.0.1",55556))
+        ServerSocket.bind(("127.0.0.1",55556)) #172.31.39.61
         ServerSocket.listen(0)
         while True:
             try:
