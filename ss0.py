@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import os
 import socket
@@ -47,7 +49,7 @@ def main(wdir):
     wlog=Logger(os.path.join(wdir,"log.txt"))
     try:
         ServerSocket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ServerSocket.bind(("127.0.0.1",55556)) #172.31.39.61
+        ServerSocket.bind(("192.168.43.96",55556)) #
         ServerSocket.listen(0)
         while True:
             try:
@@ -114,7 +116,8 @@ def main(wdir):
 
 
 if __name__=="__main__":
-    spath="/home/mr/RPiProject/dummy.py"
+    spath=__file__       #sys.argv[0]
+    print(spath)
     path=os.path.dirname(spath)
     os.chdir(path)
     main(path)
