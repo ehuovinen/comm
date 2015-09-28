@@ -1,15 +1,12 @@
-#!/usr/bin/python3
-
 import sys
 import os
 import socket
+from socket import error as SocketError
 import errno
 import time
+from contextlib import suppress
 import traceback
 import struct
-#from contextlib import suppress
-#from socket import error as SocketError
-
 class Logger():
     def __init__(self,fullPath):
         self.fpath=fullPath
@@ -49,7 +46,7 @@ def main(wdir):
     wlog=Logger(os.path.join(wdir,"log.txt"))
     try:
         ServerSocket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ServerSocket.bind(("192.168.43.96",55556)) #
+        ServerSocket.bind(("127.0.0.1",55556))
         ServerSocket.listen(0)
         while True:
             try:
@@ -116,8 +113,7 @@ def main(wdir):
 
 
 if __name__=="__main__":
-    spath=__file__       #sys.argv[0]
-    print(spath)
+    spath="/home/mr/RPiProject/dummy.py"
     path=os.path.dirname(spath)
     os.chdir(path)
     main(path)
