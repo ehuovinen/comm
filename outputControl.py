@@ -16,6 +16,11 @@ yellowLED = False
 
 def redGreenYellow(pin, zeroOne):
     GPIO.output(pin,zeroOne)
+   
+def turnOff():
+    GPIO.output(11, 0)
+    GPIO.output(13, 0)
+    GPIO.output(15, 0)
 
 def switchRed():
     global redLED
@@ -34,7 +39,7 @@ def switchGreen():
     else:
         redGreenYellow(15, 0)
         greenLED = False
-
+ 
 def switchYellow():
     global yellowLED
     if not yellowLED:
@@ -65,12 +70,13 @@ commandPipeFp="/tmp/commandPipe"
 commands={
 	"switchRed": switchRed,
         "flash": flash,
+        "turnOff": turnOff,
         "setRed": lambda: redGreenYellow(11, 1),
         "resetRed": lambda: redGreenYellow(11, 0),
-        "setYellow": lambda: print("setting Yellow"),
-        "resetYellow": lambda: print("resetting Yellow"),
-        "setGreen": lambda: print("setting Green"),
-        "resetGreen": lambda: print("resetting Green")
+        "setYellow": lambda: redGreenYellow(13, 1),
+        "resetYellow": lambda: redGreenYellow(13, 0),
+        "setGreen": lambda: redGreenYellow(15, 1),
+        "resetGreen": lambda: redGreenYellow(15, 0)
         }
 
 if os.path.exists(commandPipeFp):
@@ -97,13 +103,14 @@ try:
             ind=readReady.index(inPipe)
             if ind>-1:
                 rv=readReady[ind].read(4096)
+                inPipe.close()
                 rv=rv.split()
                 for command in rv:
                     if command in commands:
                         commands[command]()
+                        print(command)
                     else:
                         print("unrecognized command: "+str(command))
-            inPipe.close()
 except Exception as e:
     raise e
 finally:
