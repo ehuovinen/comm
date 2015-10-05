@@ -1,19 +1,14 @@
-
-# coding: utf-8
-
-# In[ ]:
-
 #!/usr/bin/python3
 import os
 import select
 import time
 import sysv_ipc
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
-#GPIO.setmode(GPIO.BOARD)
-#GPIO.setup(11,GPIO.OUT)
-#GPIO.setup(13,GPIO.OUT)
-#GPIO.setup(15,GPIO.OUT)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(11,GPIO.OUT)
+GPIO.setup(13,GPIO.OUT)
+GPIO.setup(15,GPIO.OUT)
 
 redLED = False
 greenLED = False
@@ -23,38 +18,40 @@ with os.fdopen(os.open('/tmp/note', os.O_WRONLY | os.O_CREAT, 0o666), 'w') as fl
     fl.write(str(svSM.id))
 svSM.write(b"0000000000000000000000000000000000000000000000000000000000000000")
 def redGreenYellow(pin, zeroOne):
-    #GPIO.output(pin,zeroOne)
-    pass
+    GPIO.output(pin,zeroOne)
 
 
 def red(zeroOne):
-    #GPIO.output(11,zeroOne)
+    GPIO.output(11,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",0)
     else:
         svSM.write(b"F",0)
 
 def yellow(zeroOne):
-    #GPIO.output(13,zeroOne)
+    GPIO.output(13,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",1)
     else:
         svSM.write(b"F",1)
 
 def green(zeroOne):
-    #GPIO.output(15,zeroOne)
+    GPIO.output(15,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",2)
     else:
         svSM.write(b"F",2)
 
+def turnOffOld():
+    GPIO.output(11, 0)
+    GPIO.output(13, 0)
+    GPIO.output(15, 0)
+
 def turnOff():
-    #GPIO.output(11, 0)
-    pass
-    #GPIO.output(13, 0)
-    pass
-    #GPIO.output(15, 0)
-    pass
+    red(0)
+    yellow(0)
+    green(0)
+
 
 def switchRed():
     global redLED
@@ -132,7 +129,7 @@ try:
         exit(1)
     else:
         os.mkfifo(commandPipeFp, 0o666)
-        #os.system("sudo chmod 0666 "+commandPipeFp)
+        os.system("sudo chmod 0666 "+commandPipeFp)
         while True:
             inPipe=open(commandPipeFp,"r")
             readReady, writeReady, xList= select.select([inPipe],[],[])
@@ -157,7 +154,6 @@ finally:
     os.unlink(commandPipeFp)
     svSM.remove()
     svSM.detach()
-    #GPIO.cleanup()
-    pass
+    GPIO.cleanup()
     print("cleaned up")
 
