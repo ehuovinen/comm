@@ -47,6 +47,11 @@ def turnOffOld():
     GPIO.output(13, 0)
     GPIO.output(15, 0)
 
+def turnOn():
+    red(1)
+    green(1)
+    yellow(1)
+
 def turnOff():
     red(0)
     yellow(0)
@@ -83,30 +88,66 @@ def switchYellow():
 def flash():
     for i in range(5):
         switchRed()
+        switchGreen()
+        switchYellow()
         time.sleep(1)
         switchRed()
-        time.sleep(1)
         switchGreen()
-        time.sleep(1)
-        switchGreen()
-        time.sleep(1)
         switchYellow()
         time.sleep(1)
-        switchYellow()
-        time.sleep(1)
+
+def sequenceGen():
+    sequence=(
+               (1,0,0),
+               (1,0,0),
+               (1,0,0),
+               (1,0,0),
+               (1,1,0),
+               (1,1,0),
+               (0,0,1),
+               (0,0,1),
+               (0,0,1),
+               (0,0,1),
+               (0,1,0),
+               (0,1,0),
+               )
+    i=0;
+    n=len(sequence)
+    while True:
+        red(sequence[i][0])
+        yellow(sequence[i][1])
+        green(sequence[i][2])
+        i+=1
+        if i >=n:
+            i=0
+        yield
+activeSequence=None
+sequence=sequenceGen()
+
+def activateSequence():
+    global activeSequence
+    activeSequence=1
+def deactivateSequence():
+    global activeSequence
+    activeSequence=None
 
 commandPipeFp="/tmp/commandPipe"
 
 commands={
         "switchRed": switchRed,
+        "switchGreen": switchGreen,
+        "switchYellow": switchYellow,
         "flash": flash,
         "turnOff": turnOff,
+        "turnOn": turnOn,
         "setRed": lambda: red(1),
         "resetRed": lambda: red(0),
         "setYellow": lambda: yellow(1),
         "resetYellow": lambda: yellow(0),
         "setGreen": lambda: green(1),
         "resetGreen": lambda: green(0),
+        "activateSequence": activateSequence,
+        "deactivateSequence": deactivateSequence
         }
 """
         "setRed": lambda: redGreenYellow(11, 1),
@@ -132,7 +173,7 @@ try:
         os.system("sudo chmod 0666 "+commandPipeFp)
         while True:
             inPipe=open(commandPipeFp,"r")
-            readReady, writeReady, xList= select.select([inPipe],[],[])
+            readReady, writeReady, xList= select.select([inPipe],[],[],1.0)
             ind=readReady.index(inPipe)
             if ind>-1:
                 rv=readReady[ind].read(4096)
@@ -144,6 +185,10 @@ try:
                         print(command)
                     else:
                         print("unrecognized command: "+str(command))
+            if activeSequence !=None:
+                print("check1\n")
+                next(sequence)
+ 
 except Exception as e:
     raise e
 finally:
