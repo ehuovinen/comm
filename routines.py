@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[2]:
-
 import sys
 import os
 import socket
@@ -74,6 +69,11 @@ def initRoutines(mkey):
         print(binary)
         connection.sendall(binary)
 
+    def toCommandPipe(binary, connection):
+        print(binary)
+        with open("/tmp/commandPipe","w") as fso:
+             fso.write(binary)
+
     #Send routines    
     def toBePrinted(binary, connection):
         mlen=ctypes.c_uint32(len(binary))
@@ -86,10 +86,17 @@ def initRoutines(mkey):
         print("sending:",binary)
         connection.sendall(binary)
         return receive(connection)[1]
+
+    def toBeExecuted(binary, connection):
+        mlen=ctypes.c_uint32(len(binary))
+        binary=mkey+ctypes.c_uint32(3)+mlen+binary
+        print("sending:",binary)
+
+
         
-    sendNamedTuple=namedtuple("sendRoutines","toBePrinted toGetComeback")
-    responseNamedTuple=namedtuple("responseRoutines","justPrint comeback packetedComeback")
+    sendNamedTuple=namedtuple("sendRoutines","toBePrinted toGetComeback toBeExecuted")
+    responseNamedTuple=namedtuple("responseRoutines","justPrint comeback packetedComeback toCommandPipe")
     
-    return (sendNamedTuple(toBePrinted, toGetComeback), 
-            responseNamedTuple(justPrint, comeback, packetedComeback))
+    return (sendNamedTuple(toBePrinted, toGetComeback, toBeExecuted), 
+            responseNamedTuple(justPrint, comeback, packetedComeback, toCommandPipe))
 

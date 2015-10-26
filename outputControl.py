@@ -200,5 +200,5 @@ finally:
     svSM.remove()
     svSM.detach()
     GPIO.cleanup()
-    print("cleaned up")
+    print("cleaned up happened")
 

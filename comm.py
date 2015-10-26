@@ -1,21 +1,19 @@
-
-# coding: utf-8
-
-# In[2]:
-
 import sys
 import os
 import socket
 from socket import error as SocketError
 import errno
 import time
-from contextlib import suppress
 import traceback
 import struct
 import ctypes
 
 import routines
-
+def startConnection():
+     holder=SocketCommunication()
+     holder.specify_information("192.168.43.96","sadf","asdf")
+     holder.connect()
+     return holder
 
 class SocketCommunication():
     def __init__(self):
@@ -41,7 +39,7 @@ class SocketCommunication():
         
     def command(self, command):
         command=command.encode()
-        rv=self.sendRoutines.toGetComeback(command, self.socket)
+        rv=self.sendRoutines.toBeExecuted(command, self.socket)
         print(rv)
     
     def __del__(self):
@@ -50,6 +48,3 @@ class SocketCommunication():
             self.socket.close()
         except AttributeError:
             pass
-
-        
-

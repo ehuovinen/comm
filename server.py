@@ -1,16 +1,11 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
+#!/usr/bin/python3
 import sys
 import os
 import socket
 from socket import error as SocketError
 import errno
 import time
-from contextlib import suppress
+#from contextlib import suppress
 import traceback
 import struct
 
@@ -40,23 +35,23 @@ class RemoteSocketClosed(Exception):
 class OrderedToClose(Exception):
     pass
 
-def justPrint(binary, connection):
-    print(binary.decode())
-
-def comeback(binary, connection):
-    binary= b"'"+binary+b"' right back at ya!"
-    print(binary)
-    connection.sendall(binary)
+#def justPrint(binary, connection):
+#    print(binary.decode())
+#
+#def comeback(binary, connection):
+#    binary= b"'"+binary+b"' right back at ya!"
+#    print(binary)
+#    connection.sendall(binary)
 
 def main(wdir):
-    processors=(justPrint,comeback)
+    #processors=(justPrint,comeback)
     key=b"asdf"
     sendRoutines, responseRoutines = routines.initRoutines(key)
     
     wlog=Logger(os.path.join(wdir,"log.txt"))
     try:
         ServerSocket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ServerSocket.bind(("127.0.0.1",55556))
+        ServerSocket.bind(("192.168.43.96",55556))#"127.0.0.1"
         ServerSocket.listen(0)
         while True:
             try:
@@ -124,7 +119,7 @@ def main(wdir):
 
 
 if __name__=="__main__":
-    spath="/home/mr/RPiProject/dummy.py"
+    spath=__file__ #"/home/mr/RPiProject/dummy.py"
     path=os.path.dirname(spath)
     os.chdir(path)
     main(path)
