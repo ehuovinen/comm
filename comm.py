@@ -32,14 +32,23 @@ class SocketCommunication():
         self.socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.socket.connect((self.host, self.hostPort))
         self.socket.settimeout(self.timeout)
+        self.disconnect()
+
         
     def disconnect(self):
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
         
     def command(self, command):
+
+        self.socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.socket.connect((self.host, self.hostPort))
+        self.socket.settimeout(self.timeout)
+
         command=command.encode()
         rv=self.sendRoutines.toBeExecuted(command, self.socket)
+
+        self.disconnect()
         print(rv)
     
     def __del__(self):

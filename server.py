@@ -35,16 +35,7 @@ class RemoteSocketClosed(Exception):
 class OrderedToClose(Exception):
     pass
 
-#def justPrint(binary, connection):
-#    print(binary.decode())
-#
-#def comeback(binary, connection):
-#    binary= b"'"+binary+b"' right back at ya!"
-#    print(binary)
-#    connection.sendall(binary)
-
 def main(wdir):
-    #processors=(justPrint,comeback)
     key=b"asdf"
     sendRoutines, responseRoutines = routines.initRoutines(key)
     
@@ -93,7 +84,6 @@ def main(wdir):
                         else:
                             if mtype > len(responseRoutines)-1:
                                 raise ValueError("there is no message type "+str(mtype))
-                            #processors[mtype](buff[bInd:bInd+mlen],connectionSocket)
                             responseRoutines[mtype](buff[bInd:bInd+mlen],connectionSocket)
                             buff=buff[bInd+mlen:]
                             bInd=0

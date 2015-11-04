@@ -55,14 +55,17 @@ def initRoutines(mkey):
         
     #Response routines    
     def justPrint(binary, connection):
+        print("justPrint response")
         print(binary.decode())
 
     def comeback(binary, connection):
+        print("comeback response")
         binary= b"'"+binary+b"' right back at ya!"
         print(binary)
         connection.sendall(binary)
         
     def packetedComeback(binary, connection):
+        print("packetedComeback response")
         binary= b"'"+binary+b"' right back at ya!" 
         mlen=len(binary)
         binary=mkey+ctypes.c_uint32(0)+ctypes.c_uint32(mlen)+binary
@@ -70,7 +73,7 @@ def initRoutines(mkey):
         connection.sendall(binary)
 
     def toCommandPipe(binary, connection):
-        print(binary)
+        print("acting on command",binary)
         with open("/tmp/commandPipe","w") as fso:
              fso.write(binary)
 
