@@ -75,6 +75,7 @@ def switchGreen():
     else:
         redGreenYellow(15, 0)
         greenLED = False
+        #os.close(inPipe)
 
 def switchYellow():
     global yellowLED
@@ -172,12 +173,13 @@ try:
         os.mkfifo(commandPipeFp, 0o666)
         os.system("sudo chmod 0666 "+commandPipeFp)
         while True:
-            inPipe=open(commandPipeFp,"r")
+            inPipe=os.open(commandPipeFp,os.O_RDONLY | os.O_NONBLOCK)
             readReady, writeReady, xList= select.select([inPipe],[],[],1.0)
-            ind=readReady.index(inPipe)
-            if ind>-1:
-                rv=readReady[ind].read(4096)
-                inPipe.close()
+            if len(readReady):
+                ind=readReady.index(inPipe)
+                rv=os.read(readReady[ind],4096)
+                #os.close(inPipe)
+                rv=rv.decode()
                 rv=rv.split()
                 for command in rv:
                     if command in commands:
@@ -188,12 +190,13 @@ try:
             if activeSequence !=None:
                 print("check1\n")
                 next(sequence)
+            print("check2\n")
  
 except Exception as e:
     raise e
 finally:
     try:
-        inPipe.close()
+        os.close(inPipe)
     except NameError:
         pass
     os.unlink(commandPipeFp)
