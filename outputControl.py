@@ -5,14 +5,16 @@ import time
 import sysv_ipc
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11,GPIO.OUT)
-GPIO.setup(13,GPIO.OUT)
-GPIO.setup(15,GPIO.OUT)
+GPIO.setmode(GPIO.BOARD)    ##PINS as on the BOARD
+GPIO.setup(11,GPIO.OUT)     ##RED LED
+GPIO.setup(13,GPIO.OUT)     ##YELLOW LED
+GPIO.setup(15,GPIO.OUT)     ##GREEN LED
+GPIO.setup(7,GPIO.IN)       ##Button
 
 redLED = False
 greenLED = False
 yellowLED = False
+buttonPIN=7
 svSM=sysv_ipc.SharedMemory(0x3000,sysv_ipc.IPC_CREAT,0o666,64)
 with os.fdopen(os.open('/tmp/note', os.O_WRONLY | os.O_CREAT, 0o666), 'w') as fl:
     fl.write(str(svSM.id))
@@ -22,6 +24,9 @@ def redGreenYellow(pin, zeroOne):
 
 
 def red(zeroOne):
+    """
+    Set or Reset RED LED
+    """
     GPIO.output(11,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",0)
@@ -29,6 +34,9 @@ def red(zeroOne):
         svSM.write(b"F",0)
 
 def yellow(zeroOne):
+    """
+    Set or Reset YELLOW LED
+    """
     GPIO.output(13,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",1)
@@ -36,29 +44,36 @@ def yellow(zeroOne):
         svSM.write(b"F",1)
 
 def green(zeroOne):
+    """
+    Set or Reset GREEN LED
+    """
     GPIO.output(15,zeroOne)
     if zeroOne==1:
         svSM.write(b"T",2)
     else:
         svSM.write(b"F",2)
 
-def turnOffOld():
-    GPIO.output(11, 0)
-    GPIO.output(13, 0)
-    GPIO.output(15, 0)
-
 def turnOn():
+    """
+    Turn ALL LEDs ON
+    """
     red(1)
     green(1)
     yellow(1)
 
 def turnOff():
+    """
+    Turn ALL LEDs OFF
+    """
     red(0)
     yellow(0)
     green(0)
 
 
 def switchRed():
+    """
+    Switch the RED LED
+    """
     global redLED
     if not redLED:
         redGreenYellow(11, 1)
@@ -68,6 +83,9 @@ def switchRed():
         redLED = False
 
 def switchGreen():
+    """
+    Switch the GREEN LED
+    """
     global greenLED
     if not greenLED:
         redGreenYellow(15, 1)
@@ -78,6 +96,9 @@ def switchGreen():
         #os.close(inPipe)
 
 def switchYellow():
+    """
+    Switch the YELLOW LED
+    """
     global yellowLED
     if not yellowLED:
         redGreenYellow(13, 1)
@@ -87,17 +108,19 @@ def switchYellow():
         yellowLED = False
 
 def flash():
-    for i in range(5):
-        switchRed()
-        switchGreen()
-        switchYellow()
-        time.sleep(1)
+    """
+    Switch the LEDs 5 times
+    """
+    for i in range(10):
         switchRed()
         switchGreen()
         switchYellow()
         time.sleep(1)
 
 def sequenceGen():
+    """
+    Trafic lights sequence
+    """
     sequence=(
                (1,0,0),
                (1,0,0),
@@ -122,8 +145,92 @@ def sequenceGen():
         if i >=n:
             i=0
         yield
+
+state=0
+timePoint=0
+
+def state0():
+    global state, timePoint
+    print("state0 check run")
+    state=1
+    red(0)
+    yellow(0)
+    green(1)
+    timePoint=time.time()
+
+def state1():
+    print("state1 check run")
+    global state, timePoint
+    if not GPIO.input(buttonPIN):
+        state=2
+        red(0)
+        yellow(1)
+        green(0)
+        timePoint=time.time()
+
+def state2():
+    print("state2 check run")
+    global state, timePoint
+    t=time.time()
+    print(t)
+    if t-timePoint>=3:
+        state=3
+        red(1)
+        yellow(0)
+        green(0)
+        timePoint=time.time()
+
+def state3():
+    global state, timePoint
+    t=time.time()
+    print("state3 check run")
+    if t-timePoint>=6: ##MORE time for RED
+        state=4
+        red(1)
+        yellow(1)
+        green(0)
+        timePoint=time.time()
+
+def state4():
+    global state, timePoint
+    print("state4 check run")
+    t=time.time()
+    if t-timePoint>=3:    
+        state=5
+        red(0)
+        yellow(0)
+        green(1)
+        timePoint=time.time()
+
+def state5():
+    global state, timePoint
+    print("state5 check run")
+    t=time.time()
+    if t-timePoint>=10:  ##MORE time for GREEN
+        state=1
+        timePoint=time.time()
+
+def StateMachine():
+    """
+    Trafic lights sequence
+    """
+    global state, timePoint
+  
+    timePoint=time.time()
+    conditions=[state0, state1, state2, state3, state4, state5]
+    while True:
+        print("state", state)
+        conditions[state]()
+        yield
 activeSequence=None
-sequence=sequenceGen()
+sequence=StateMachine()
+
+
+def button():
+    """
+    TEST the Trafic lights
+    """
+    
 
 def activateSequence():
     global activeSequence
@@ -172,9 +279,9 @@ try:
     else:
         os.mkfifo(commandPipeFp, 0o666)
         os.system("sudo chmod 0666 "+commandPipeFp)
+        inPipe=os.open(commandPipeFp,os.O_RDONLY | os.O_NONBLOCK)
         while True:
-            inPipe=os.open(commandPipeFp,os.O_RDONLY | os.O_NONBLOCK)
-            readReady, writeReady, xList= select.select([inPipe],[],[],1.0)
+            readReady, writeReady, xList= select.select([inPipe],[],[],0.05)
             if len(readReady):
                 ind=readReady.index(inPipe)
                 rv=os.read(readReady[ind],4096)
@@ -190,7 +297,7 @@ try:
             if activeSequence !=None:
                 print("check1\n")
                 next(sequence)
-            print("check2\n")
+            #print("check2\n")
  
 except Exception as e:
     raise e
