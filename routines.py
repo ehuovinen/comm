@@ -75,7 +75,7 @@ def initRoutines(mkey):
     def toCommandPipe(binary, connection):
         print("acting on command",binary)
         with open("/tmp/commandPipe","w") as fso:
-             fso.write(binary)
+             fso.write(binary.decode())
 
     #Send routines    
     def toBePrinted(binary, connection):
@@ -94,6 +94,7 @@ def initRoutines(mkey):
         mlen=ctypes.c_uint32(len(binary))
         binary=mkey+ctypes.c_uint32(3)+mlen+binary
         print("sending:",binary)
+        connection.sendall(binary)
 
 
         

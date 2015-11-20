@@ -84,6 +84,7 @@ def main(wdir):
                         else:
                             if mtype > len(responseRoutines)-1:
                                 raise ValueError("there is no message type "+str(mtype))
+                            print("messageCode: "+str(mtype)+"\nMessage: "+buff[bInd:bInd+mlen].decode())
                             responseRoutines[mtype](buff[bInd:bInd+mlen],connectionSocket)
                             buff=buff[bInd+mlen:]
                             bInd=0

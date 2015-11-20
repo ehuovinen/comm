@@ -151,7 +151,6 @@ timePoint=0
 
 def state0():
     global state, timePoint
-    print("state0 check run")
     state=1
     red(0)
     yellow(0)
@@ -159,7 +158,6 @@ def state0():
     timePoint=time.time()
 
 def state1():
-    print("state1 check run")
     global state, timePoint
     if not GPIO.input(buttonPIN):
         state=2
@@ -169,10 +167,8 @@ def state1():
         timePoint=time.time()
 
 def state2():
-    print("state2 check run")
     global state, timePoint
     t=time.time()
-    print(t)
     if t-timePoint>=3:
         state=3
         red(1)
@@ -183,7 +179,6 @@ def state2():
 def state3():
     global state, timePoint
     t=time.time()
-    print("state3 check run")
     if t-timePoint>=6: ##MORE time for RED
         state=4
         red(1)
@@ -193,7 +188,6 @@ def state3():
 
 def state4():
     global state, timePoint
-    print("state4 check run")
     t=time.time()
     if t-timePoint>=3:    
         state=5
@@ -204,7 +198,6 @@ def state4():
 
 def state5():
     global state, timePoint
-    print("state5 check run")
     t=time.time()
     if t-timePoint>=10:  ##MORE time for GREEN
         state=1
@@ -219,7 +212,6 @@ def StateMachine():
     timePoint=time.time()
     conditions=[state0, state1, state2, state3, state4, state5]
     while True:
-        print("state", state)
         conditions[state]()
         yield
 activeSequence=None
@@ -235,8 +227,10 @@ def button():
 def activateSequence():
     global activeSequence
     activeSequence=1
+    svSM.write(b"T",3)
 def deactivateSequence():
     global activeSequence
+    svSM.write(b"F",3)
     activeSequence=None
 
 commandPipeFp="/tmp/commandPipe"
@@ -295,7 +289,6 @@ try:
                     else:
                         print("unrecognized command: "+str(command))
             if activeSequence !=None:
-                print("check1\n")
                 next(sequence)
             #print("check2\n")
  
