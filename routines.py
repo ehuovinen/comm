@@ -18,7 +18,7 @@ class OrderedToClose(Exception):
 
 def initRoutines(mkey):
     if type(mkey)!=type(b"bytes"):
-        raise ValueError
+        mkey=mkey.decode()
         
     def receive(connection):
         mtype=None

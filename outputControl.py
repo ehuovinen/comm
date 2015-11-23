@@ -3,6 +3,7 @@ import os
 import select
 import time
 import sysv_ipc
+import errno
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)    ##PINS as on the BOARD
@@ -278,16 +279,21 @@ try:
             readReady, writeReady, xList= select.select([inPipe],[],[],0.05)
             if len(readReady):
                 ind=readReady.index(inPipe)
-                rv=os.read(readReady[ind],4096)
-                #os.close(inPipe)
-                rv=rv.decode()
-                rv=rv.split()
-                for command in rv:
-                    if command in commands:
-                        commands[command]()
-                        print(command)
-                    else:
-                        print("unrecognized command: "+str(command))
+                try:
+                    rv=os.read(readReady[ind],4096)
+                    #os.close(inPipe)
+                    rv=rv.decode()
+                    rv=rv.split()
+                    for command in rv:
+                        if command in commands:
+                            commands[command]()
+                            print(command)
+                        else:
+                            print("unrecognized command: "+str(command))
+                except OSError as err:
+                    if err.errno == errno.EAGAIN:
+                        pass 
+                        
             if activeSequence !=None:
                 next(sequence)
             #print("check2\n")
