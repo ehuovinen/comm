@@ -290,7 +290,7 @@ try:
                             print(command)
                         else:
                             print("unrecognized command: "+str(command))
-                except IOError as err:
+                except OSError as err:
                     if err.errno == errno.EAGAIN:
                         pass 
                         
