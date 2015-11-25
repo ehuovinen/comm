@@ -68,7 +68,9 @@ def main(wdir):
                             continue
                         if buff[bInd:bInd+4]==key:
                             
-                            mtype, mlen = struct.unpack("<LL",buff[bInd+4:bInd+12])
+                            #mtype, mlen = struct.unpack("<LL",buff[bInd+4:bInd+12])
+                            mtype = int(buff[bInd+4:bInd+12].decode()[:4])
+                            mlen = int(buff[bInd+4:bInd+12].decode()[4:])
                             bInd+=12
                             headerRecieved=True
                         else:
