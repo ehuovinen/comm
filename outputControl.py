@@ -226,7 +226,11 @@ def button():
     
 
 def activateSequence():
-    global activeSequence
+    global activeSequence, state
+    state = 0
+    red(0)
+    yellow(0)
+    green(1)
     activeSequence=1
     svSM.write(b"T",3)
 def deactivateSequence():
